@@ -37,6 +37,8 @@ const TripsList: React.FC<TripsListProps> = ({ trips, onDelete, onEdit }) => {
               <TableRow className="bg-gray-50">
                 <TableHead className="font-semibold">Date</TableHead>
                 <TableHead className="font-semibold">Vehicle</TableHead>
+                <TableHead className="font-semibold">Vehicle No.</TableHead>
+                <TableHead className="font-semibold">Driver</TableHead>
                 <TableHead className="font-semibold">From</TableHead>
                 <TableHead className="font-semibold">To</TableHead>
                 <TableHead className="font-semibold">Rent</TableHead>
@@ -58,6 +60,12 @@ const TripsList: React.FC<TripsListProps> = ({ trips, onDelete, onEdit }) => {
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                         {trip.vehicle}
                       </span>
+                    </TableCell>
+                    <TableCell className="font-medium text-gray-700">
+                      {trip.vehicleNumber}
+                    </TableCell>
+                    <TableCell className="font-medium text-gray-700">
+                      {trip.driverName}
                     </TableCell>
                     <TableCell className="font-medium">{trip.fromLocation}</TableCell>
                     <TableCell className="font-medium">{trip.destination}</TableCell>

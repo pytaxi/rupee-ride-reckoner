@@ -19,6 +19,8 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
   const [formData, setFormData] = useState({
     date: editingTrip?.date || new Date().toISOString().split('T')[0],
     vehicle: editingTrip?.vehicle || '',
+    vehicleNumber: editingTrip?.vehicleNumber || '',
+    driverName: editingTrip?.driverName || '',
     fromLocation: editingTrip?.fromLocation || '',
     destination: editingTrip?.destination || '',
     rentAmount: editingTrip?.rentAmount?.toString() || '',
@@ -34,7 +36,7 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.date || !formData.vehicle || !formData.fromLocation || !formData.destination || !formData.rentAmount || !formData.dieselAmount) {
+    if (!formData.date || !formData.vehicle || !formData.vehicleNumber || !formData.driverName || !formData.fromLocation || !formData.destination || !formData.rentAmount || !formData.dieselAmount) {
       alert('Please fill in all required fields');
       return;
     }
@@ -43,6 +45,8 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
       id: editingTrip?.id || '',
       date: formData.date,
       vehicle: formData.vehicle,
+      vehicleNumber: formData.vehicleNumber,
+      driverName: formData.driverName,
       fromLocation: formData.fromLocation,
       destination: formData.destination,
       rentAmount: parseFloat(formData.rentAmount),
@@ -57,7 +61,7 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
   const netProfit = (parseFloat(formData.rentAmount) || 0) - (parseFloat(formData.dieselAmount) || 0);
 
   return (
-    <Card className="max-w-2xl mx-auto shadow-xl border-0 bg-white">
+    <Card className="max-w-3xl mx-auto shadow-xl border-0 bg-white">
       <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
         <CardTitle className="text-2xl font-bold flex items-center gap-2">
           <CarTaxiFront className="h-6 w-6" />
@@ -66,7 +70,7 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
       </CardHeader>
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Trip Date *</Label>
               <Input
@@ -90,6 +94,28 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="vehicleNumber">Vehicle Number *</Label>
+              <Input
+                id="vehicleNumber"
+                placeholder="e.g., KA 01 AB 1234"
+                value={formData.vehicleNumber}
+                onChange={(e) => handleInputChange('vehicleNumber', e.target.value.toUpperCase())}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="driverName">Driver Name *</Label>
+              <Input
+                id="driverName"
+                placeholder="Driver's full name"
+                value={formData.driverName}
+                onChange={(e) => handleInputChange('driverName', e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
@@ -154,24 +180,26 @@ const TripEntryForm: React.FC<TripEntryFormProps> = ({ onSubmit, onCancel, editi
                 Positive: Customer owes you | Negative: You owe customer
               </p>
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Net Profit</Label>
               <div className={`text-2xl font-bold p-3 rounded border ${netProfit >= 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
                 ₹{netProfit.toFixed(2)}
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="remarks">Remarks</Label>
-            <Textarea
-              id="remarks"
-              placeholder="Additional notes"
-              value={formData.remarks}
-              onChange={(e) => handleInputChange('remarks', e.target.value)}
-              rows={3}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="remarks">Remarks</Label>
+              <Textarea
+                id="remarks"
+                placeholder="Additional notes"
+                value={formData.remarks}
+                onChange={(e) => handleInputChange('remarks', e.target.value)}
+                rows={3}
+              />
+            </div>
           </div>
 
           <div className="flex gap-4 justify-end">

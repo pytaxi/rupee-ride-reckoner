@@ -3,6 +3,8 @@ export interface TaxiTrip {
   id: string;
   date: string;
   vehicle: string;
+  vehicleNumber: string;
+  driverName: string;
   fromLocation: string;
   destination: string;
   rentAmount: number;

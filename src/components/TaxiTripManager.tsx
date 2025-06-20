@@ -62,7 +62,9 @@ const TaxiTripManager = () => {
       const netProfit = trip.rentAmount - trip.dieselAmount;
       return {
         'Date': new Date(trip.date).toLocaleDateString('en-IN'),
-        'Vehicle': trip.vehicle,
+        'Vehicle Type': trip.vehicle,
+        'Vehicle Number': trip.vehicleNumber,
+        'Driver Name': trip.driverName,
         'From': trip.fromLocation,
         'To': trip.destination,
         'Rent Amount (₹)': trip.rentAmount,
