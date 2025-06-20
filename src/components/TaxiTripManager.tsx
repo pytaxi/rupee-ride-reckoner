@@ -12,15 +12,27 @@ import { useToast } from '@/hooks/use-toast';
 const TaxiTripManager = () => {
   const [trips, setTrips] = useState<TaxiTrip[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<TaxiTrip | null>(null);
   const { toast } = useToast();
 
-  const addTrip = (trip: TaxiTrip) => {
-    setTrips(prev => [...prev, { ...trip, id: Date.now().toString() }]);
+  const addOrUpdateTrip = (trip: TaxiTrip) => {
+    if (editingTrip) {
+      // Update existing trip
+      setTrips(prev => prev.map(t => t.id === trip.id ? trip : t));
+      toast({
+        title: "Trip Updated Successfully! 🚕",
+        description: "Your trip has been updated.",
+      });
+    } else {
+      // Add new trip
+      setTrips(prev => [...prev, { ...trip, id: Date.now().toString() }]);
+      toast({
+        title: "Trip Added Successfully! 🚕",
+        description: "Your trip has been recorded.",
+      });
+    }
     setShowForm(false);
-    toast({
-      title: "Trip Added Successfully! 🚕",
-      description: "Your trip has been recorded.",
-    });
+    setEditingTrip(null);
   };
 
   const deleteTrip = (id: string) => {
@@ -29,6 +41,11 @@ const TaxiTripManager = () => {
       title: "Trip Deleted",
       description: "Trip has been removed from records.",
     });
+  };
+
+  const editTrip = (trip: TaxiTrip) => {
+    setEditingTrip(trip);
+    setShowForm(true);
   };
 
   const exportToExcel = () => {
@@ -46,9 +63,11 @@ const TaxiTripManager = () => {
       return {
         'Date': new Date(trip.date).toLocaleDateString('en-IN'),
         'Vehicle': trip.vehicle,
-        'Destination': trip.destination,
+        'From': trip.fromLocation,
+        'To': trip.destination,
         'Rent Amount (₹)': trip.rentAmount,
         'Diesel Amount (₹)': trip.dieselAmount,
+        'Balance Amount (₹)': trip.balanceAmount,
         'Net Profit (₹)': netProfit,
         'Remarks': trip.remarks || '-'
       };
@@ -69,6 +88,7 @@ const TaxiTripManager = () => {
 
   const totalRent = trips.reduce((sum, trip) => sum + trip.rentAmount, 0);
   const totalDiesel = trips.reduce((sum, trip) => sum + trip.dieselAmount, 0);
+  const totalBalance = trips.reduce((sum, trip) => sum + trip.balanceAmount, 0);
   const totalProfit = totalRent - totalDiesel;
 
   return (
@@ -80,11 +100,11 @@ const TaxiTripManager = () => {
           <h1 className="text-4xl font-bold text-gray-800">Taxi Trip Tracker</h1>
           <IndianRupee className="h-12 w-12 text-green-600" />
         </div>
-        <p className="text-lg text-gray-600">Track your daily trips, rent and diesel expenses</p>
+        <p className="text-lg text-gray-600">Track your daily trips, rent, diesel expenses and customer balances</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -105,6 +125,18 @@ const TaxiTripManager = () => {
                 <p className="text-2xl font-bold">₹{totalDiesel.toLocaleString('en-IN')}</p>
               </div>
               <IndianRupee className="h-8 w-8 text-red-100" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100">Total Balance</p>
+                <p className="text-2xl font-bold">₹{totalBalance.toLocaleString('en-IN')}</p>
+              </div>
+              <IndianRupee className="h-8 w-8 text-yellow-100" />
             </div>
           </CardContent>
         </Card>
@@ -137,7 +169,10 @@ const TaxiTripManager = () => {
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-4 justify-center">
         <Button 
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingTrip(null);
+            setShowForm(true);
+          }}
           className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg shadow-lg"
           size="lg"
         >
@@ -160,13 +195,17 @@ const TaxiTripManager = () => {
       {/* Trip Entry Form */}
       {showForm && (
         <TripEntryForm 
-          onSubmit={addTrip}
-          onCancel={() => setShowForm(false)}
+          onSubmit={addOrUpdateTrip}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingTrip(null);
+          }}
+          editingTrip={editingTrip}
         />
       )}
 
       {/* Trips List */}
-      <TripsList trips={trips} onDelete={deleteTrip} />
+      <TripsList trips={trips} onDelete={deleteTrip} onEdit={editTrip} />
     </div>
   );
 };

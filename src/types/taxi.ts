@@ -2,10 +2,12 @@
 export interface TaxiTrip {
   id: string;
   date: string;
-  vehicle: string; // Vehicle name/number
+  vehicle: string;
+  fromLocation: string;
   destination: string;
   rentAmount: number;
   dieselAmount: number;
+  balanceAmount: number; // Amount customer owes or we owe them
   remarks?: string;
 }
 
