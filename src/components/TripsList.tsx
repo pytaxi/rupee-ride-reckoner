@@ -18,7 +18,7 @@ const TripsList: React.FC<TripsListProps> = ({ trips, onDelete }) => {
         <CardContent>
           <CarTaxiFront className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-600 mb-2">No trips recorded yet</h3>
-          <p className="text-gray-500">Start by adding your first taxi trip above!</p>
+          <p className="text-gray-500">Start by adding your first trip above!</p>
         </CardContent>
       </Card>
     );
@@ -35,58 +35,52 @@ const TripsList: React.FC<TripsListProps> = ({ trips, onDelete }) => {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-semibold">Date</TableHead>
-                <TableHead className="font-semibold">Route</TableHead>
-                <TableHead className="font-semibold">Distance</TableHead>
-                <TableHead className="font-semibold">Taxi Type</TableHead>
-                <TableHead className="font-semibold">Driver</TableHead>
-                <TableHead className="font-semibold">Trip Amount</TableHead>
-                <TableHead className="font-semibold">Diesel Expense</TableHead>
-                <TableHead className="font-semibold">Profit/Loss</TableHead>
+                <TableHead className="font-semibold">Vehicle</TableHead>
+                <TableHead className="font-semibold">Destination</TableHead>
+                <TableHead className="font-semibold">Rent Amount</TableHead>
+                <TableHead className="font-semibold">Diesel Amount</TableHead>
+                <TableHead className="font-semibold">Net Profit</TableHead>
                 <TableHead className="font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {trips.map((trip) => (
-                <TableRow key={trip.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">
-                    {new Date(trip.date).toLocaleDateString('en-IN')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium">{trip.from}</div>
-                      <div className="text-sm text-gray-500">to {trip.to}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{trip.distance} km</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                      {trip.taxiType}
-                    </span>
-                  </TableCell>
-                  <TableCell>{trip.driverName}</TableCell>
-                  <TableCell className="font-semibold text-green-600">
-                    ₹{trip.tripAmount.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="font-semibold text-red-600">
-                    ₹{trip.dieselExpense.toFixed(2)}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`font-semibold ${trip.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ₹{trip.profit.toFixed(2)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onDelete(trip.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {trips.map((trip) => {
+                const netProfit = trip.rentAmount - trip.dieselAmount;
+                return (
+                  <TableRow key={trip.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      {new Date(trip.date).toLocaleDateString('en-IN')}
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        {trip.vehicle}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium">{trip.destination}</TableCell>
+                    <TableCell className="font-semibold text-green-600">
+                      ₹{trip.rentAmount.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="font-semibold text-red-600">
+                      ₹{trip.dieselAmount.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`font-semibold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ₹{netProfit.toFixed(2)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onDelete(trip.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { CarTaxiFront, IndianRupee, Download, Plus } from 'lucide-react';
 import TripEntryForm from './TripEntryForm';
 import TripsList from './TripsList';
@@ -19,7 +19,7 @@ const TaxiTripManager = () => {
     setShowForm(false);
     toast({
       title: "Trip Added Successfully! 🚕",
-      description: "Your taxi trip has been recorded.",
+      description: "Your trip has been recorded.",
     });
   };
 
@@ -41,40 +41,22 @@ const TaxiTripManager = () => {
       return;
     }
 
-    const exportData = trips.map(trip => ({
-      'Trip ID': trip.id,
-      'Date': new Date(trip.date).toLocaleDateString('en-IN'),
-      'From': trip.from,
-      'To': trip.to,
-      'Distance (km)': trip.distance,
-      'Taxi Type': trip.taxiType,
-      'Driver Name': trip.driverName,
-      'Passenger Count': trip.passengerCount,
-      'Base Fare (₹)': trip.baseFare,
-      'Per KM Rate (₹)': trip.perKmRate,
-      'Trip Amount (₹)': trip.tripAmount,
-      'Diesel Rate (₹/L)': trip.dieselRate,
-      'Fuel Consumed (L)': trip.fuelConsumed,
-      'Diesel Expense (₹)': trip.dieselExpense,
-      'Total Expense (₹)': trip.totalExpense,
-      'Profit/Loss (₹)': trip.profit,
-      'Remarks': trip.remarks || '-'
-    }));
+    const exportData = trips.map(trip => {
+      const netProfit = trip.rentAmount - trip.dieselAmount;
+      return {
+        'Date': new Date(trip.date).toLocaleDateString('en-IN'),
+        'Vehicle': trip.vehicle,
+        'Destination': trip.destination,
+        'Rent Amount (₹)': trip.rentAmount,
+        'Diesel Amount (₹)': trip.dieselAmount,
+        'Net Profit (₹)': netProfit,
+        'Remarks': trip.remarks || '-'
+      };
+    });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Taxi Trips');
-
-    // Add some styling to the Excel sheet
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const address = XLSX.utils.encode_col(C) + "1";
-      if (!ws[address]) continue;
-      ws[address].s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: "4F46E5" } }
-      };
-    }
 
     const fileName = `Taxi_Trips_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.xlsx`;
     XLSX.writeFile(wb, fileName);
@@ -85,9 +67,9 @@ const TaxiTripManager = () => {
     });
   };
 
-  const totalRevenue = trips.reduce((sum, trip) => sum + trip.tripAmount, 0);
-  const totalExpenses = trips.reduce((sum, trip) => sum + trip.totalExpense, 0);
-  const totalProfit = trips.reduce((sum, trip) => sum + trip.profit, 0);
+  const totalRent = trips.reduce((sum, trip) => sum + trip.rentAmount, 0);
+  const totalDiesel = trips.reduce((sum, trip) => sum + trip.dieselAmount, 0);
+  const totalProfit = totalRent - totalDiesel;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -95,10 +77,10 @@ const TaxiTripManager = () => {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <CarTaxiFront className="h-12 w-12 text-yellow-500" />
-          <h1 className="text-4xl font-bold text-gray-800">Taxi Trip Manager</h1>
+          <h1 className="text-4xl font-bold text-gray-800">Taxi Trip Tracker</h1>
           <IndianRupee className="h-12 w-12 text-green-600" />
         </div>
-        <p className="text-lg text-gray-600">Manage your taxi trips, expenses, and profits efficiently</p>
+        <p className="text-lg text-gray-600">Track your daily trips, rent and diesel expenses</p>
       </div>
 
       {/* Summary Cards */}
@@ -107,8 +89,8 @@ const TaxiTripManager = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100">Total Revenue</p>
-                <p className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN')}</p>
+                <p className="text-green-100">Total Rent</p>
+                <p className="text-2xl font-bold">₹{totalRent.toLocaleString('en-IN')}</p>
               </div>
               <IndianRupee className="h-8 w-8 text-green-100" />
             </div>
@@ -119,8 +101,8 @@ const TaxiTripManager = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100">Total Expenses</p>
-                <p className="text-2xl font-bold">₹{totalExpenses.toLocaleString('en-IN')}</p>
+                <p className="text-red-100">Total Diesel</p>
+                <p className="text-2xl font-bold">₹{totalDiesel.toLocaleString('en-IN')}</p>
               </div>
               <IndianRupee className="h-8 w-8 text-red-100" />
             </div>
@@ -156,7 +138,7 @@ const TaxiTripManager = () => {
       <div className="flex flex-wrap gap-4 justify-center">
         <Button 
           onClick={() => setShowForm(true)}
-          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg shadow-lg"
           size="lg"
         >
           <Plus className="mr-2 h-5 w-5" />
@@ -166,7 +148,7 @@ const TaxiTripManager = () => {
         <Button 
           onClick={exportToExcel}
           variant="outline"
-          className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-200"
+          className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg shadow-lg"
           size="lg"
           disabled={trips.length === 0}
         >
